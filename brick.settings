@@ -1,0 +1,3 @@
+{
+  "run": "cd \"/home/premium-edtech-website\" && quarks run"
+}

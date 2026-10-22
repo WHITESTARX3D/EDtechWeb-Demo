@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# PLACEHOLDER: update host at go-live
+Sitemap: https://www.brandname.example/sitemap.xml

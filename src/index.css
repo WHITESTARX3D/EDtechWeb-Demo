@@ -1,0 +1,777 @@
+/**
+ * index.css — Design system backbone
+ * ------------------------------------------------------------------
+ * Order: Tailwind v4 import -> @theme tokens -> base styles ->
+ * glass/skeuomorphic component layer -> 3D helpers -> keyframes.
+ * Palette + radii are sampled from the reference and tokenised here.
+ */
+
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------
+ * 1. DESIGN TOKENS  (v4 @theme — these become Tailwind utilities
+ *    AND CSS custom properties usable in plain CSS below)
+ * ---------------------------------------------------------------- */
+@theme {
+  --color-violet: #7b4fd8;
+  --color-violet-bright: #9a72f0;
+  --color-violet-deep: #5b34a8;
+  --color-violet-ghost: #efe9ff;
+  --color-orange: #ff6b0a;
+  --color-orange-soft: #ff8a3c;
+  --color-orange-deep: #e05a00;
+  --color-ink: #0b2b2a;
+  --color-ink-soft: #33504e;
+  --color-muted: #7b80a0;
+  --color-page: #fbfaff;
+  --color-panel: #f4f2ff;
+  --color-frame: #d3c8f5;
+  --color-sun: #ffd23f;
+  --color-peach: #f8cfc4;
+  --color-hairline: #e9e5f9;
+  --color-cgreen: #1fa97c;
+  --color-ccyan: #0ea5b7;
+  --color-cred: #e5484d;
+  --color-cblue: #2563eb;
+  --color-amber: #f59e0b;
+  --color-wa: #1fb355;
+
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --ease-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 24px 48px -30px rgba(43, 32, 102, 0.22);
+}
+
+/* ----------------------------------------------------------------
+ * 2. BASE
+ * ---------------------------------------------------------------- */
+html {
+  /* Invisible scrollbar — page still scrolls via wheel, touch, keys. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-frame);
+  color: var(--color-ink);
+}
+
+/* Accessible, always-visible focus ring for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--color-violet);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* Line length discipline: body copy never exceeds ~70ch. */
+.measure {
+  max-width: 65ch;
+}
+
+/* Skip link for assistive tech. */
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 200;
+  transform: translateY(-80px);
+  transition: transform 0.25s var(--ease-expo);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Serif display setting reused on all headings. */
+.display {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+}
+
+/* ----------------------------------------------------------------
+ * 3. GLASSMORPHISM  (spar        ingly: nav, chips, modals)
+ * ---------------------------------------------------------------- */
+.glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 18px 44px -24px rgba(88, 60, 180, 0.35);
+}
+.glass-deep {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 30px 70px -30px rgba(88, 60, 180, 0.45);
+}
+
+/* Nav-spec frosted glass: used as an absolute inset-0 layer so the
+   blur samples the page instead of the pill's other children. */
+.glass-nav {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 8px 32px rgba(123, 79, 216, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* ----------------------------------------------------------------
+ * 4. SKEUOMORPHISM — buttons, tiles, toggles, inputs
+ *    Recipe: layered gradient + inner highlight + inner shade +
+ *    colored drop shadow. :active drops 1px and tightens shadow.
+ * ---------------------------------------------------------------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  cursor: pointer;
+  overflow: hidden;
+  border: 0;
+  white-space: nowrap;
+  transition: transform 0.2s var(--ease-expo), box-shadow 0.2s var(--ease-expo),
+    filter 0.2s var(--ease-expo);
+}
+.btn-md { padding: 0.8rem 1.5rem; font-size: 0.875rem; }
+.btn-lg { padding: 1rem 1.9rem; font-size: 0.95rem; }
+.btn-sm { padding: 0.55rem 1.05rem; font-size: 0.78rem; }
+
+.btn-violet {
+  color: #fff;
+  background: linear-gradient(180deg, #9a72f0 0%, #7b4fd8 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 6px rgba(60, 20, 140, 0.35),
+    0 10px 24px -8px rgba(123, 79, 216, 0.55);
+  text-shadow: 0 1px 1px rgba(60, 20, 140, 0.3);
+}
+.btn-violet:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 6px rgba(60, 20, 140, 0.35),
+    0 18px 34px -10px rgba(123, 79, 216, 0.6);
+}
+.btn-violet:active {
+  transform: translateY(1px);
+  filter: brightness(0.98);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 4px rgba(60, 20, 140, 0.35),
+    0 4px 10px -6px rgba(123, 79, 216, 0.55);
+}
+
+.btn-orange {
+  color: #fff;
+  background: linear-gradient(180deg, #ff8a3c 0%, #ff6b0a 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -3px 6px rgba(160, 50, 0, 0.35),
+    0 10px 24px -8px rgba(255, 107, 10, 0.5);
+  text-shadow: 0 1px 1px rgba(160, 50, 0, 0.3);
+}
+.btn-orange:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -3px 6px rgba(160, 50, 0, 0.35),
+    0 18px 34px -10px rgba(255, 107, 10, 0.55);
+}
+.btn-orange:active {
+  transform: translateY(1px);
+  filter: brightness(0.98);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px rgba(160, 50, 0, 0.35),
+    0 4px 10px -6px rgba(255, 107, 10, 0.5);
+}
+
+.btn-wa {
+  color: #fff;
+  background: linear-gradient(180deg, #35cf72 0%, #1fb355 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -3px 6px rgba(0, 90, 40, 0.35), 0 10px 24px -8px rgba(31, 179, 85, 0.5);
+}
+.btn-wa:hover { transform: translateY(-2px); filter: brightness(1.05); }
+.btn-wa:active { transform: translateY(1px); }
+
+/* Soft "cream" secondary button — layered like paper. */
+.btn-cream {
+  color: var(--color-ink);
+  background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%);
+  border: 1px solid rgba(123, 79, 216, 0.2);
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -3px 6px rgba(123, 79, 216, 0.08),
+    0 8px 18px -10px rgba(43, 32, 102, 0.28);
+}
+.btn-cream:hover {
+  transform: translateY(-2px);
+  border-color: rgba(123, 79, 216, 0.42);
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -3px 6px rgba(123, 79, 216, 0.08),
+    0 16px 28px -12px rgba(43, 32, 102, 0.32);
+}
+.btn-cream:active { transform: translateY(1px); box-shadow: inset 0 2px 6px rgba(123,79,216,.12); }
+
+/* Sheen sweep element placed inside every button. */
+.btn-sheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.btn-sheen::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  width: 38%;
+  left: -70%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-18deg);
+}
+.btn:hover .btn-sheen::before {
+  animation: sheenSweep 0.9s var(--ease-expo);
+}
+@keyframes sheenSweep {
+  from { left: -70%; }
+  to { left: 150%; }
+}
+
+/* Click ripple injected by JS. */
+.ripple {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.55);
+  transform: scale(0);
+  animation: rippleGo 0.65s var(--ease-expo) forwards;
+  pointer-events: none;
+}
+@keyframes rippleGo {
+  to { transform: scale(3.2); opacity: 0; }
+}
+
+/* Skeuomorphic icon tile. */
+.tile {
+  border-radius: 1.4rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%);
+  border: 1px solid rgba(123, 79, 216, 0.14);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -6px 12px rgba(123, 79, 216, 0.09),
+    0 14px 28px -16px rgba(43, 32, 102, 0.28);
+  transition: transform 0.25s var(--ease-expo), box-shadow 0.25s var(--ease-expo);
+}
+.tile:hover {
+  transform: translateY(-3px);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -6px 12px rgba(123, 79, 216, 0.09),
+    0 22px 38px -18px rgba(43, 32, 102, 0.34);
+}
+.tile-ico {
+  display: grid;
+  place-items: center;
+  border-radius: 1rem;
+  color: #fff;
+  background: linear-gradient(180deg, var(--tint1, #9a72f0), var(--tint2, #7b4fd8));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -3px 5px rgba(43, 20, 110, 0.3),
+    0 8px 16px -6px var(--tintshadow, rgba(123, 79, 216, 0.5));
+}
+
+/* Skeuomorphic toggle switch (pricing monthly/annual). */
+.switch {
+  position: relative;
+  display: inline-flex;
+  padding: 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #efecff, #ffffff);
+  border: 1px solid rgba(123, 79, 216, 0.18);
+  box-shadow: inset 0 2px 5px rgba(43, 32, 102, 0.1), 0 1px 0 #fff;
+}
+.switch button {
+  position: relative;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 0.5rem 1.15rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  transition: color 0.25s var(--ease-expo);
+  cursor: pointer;
+}
+.switch button[aria-pressed="true"] { color: #fff; }
+.switch-knob {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #9a72f0, #7b4fd8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -3px 5px rgba(60, 20, 140, 0.35),
+    0 6px 14px -6px rgba(123, 79, 216, 0.6);
+}
+
+/* Tactile inputs. */
+.input {
+  width: 100%;
+  border-radius: 1.1rem;
+  background: linear-gradient(180deg, #fdfcff, #ffffff);
+  border: 1px solid rgba(123, 79, 216, 0.18);
+  padding: 0.9rem 1.15rem;
+  font-size: 0.9rem;
+  color: var(--color-ink);
+  box-shadow: inset 0 2px 4px rgba(43, 32, 102, 0.06), 0 1px 0 #fff;
+  transition: border-color 0.2s var(--ease-expo), box-shadow 0.2s var(--ease-expo);
+}
+.input::placeholder { color: var(--color-muted); opacity: 0.8; }
+.input:focus {
+  outline: none;
+  border-color: var(--color-violet);
+  box-shadow: inset 0 2px 4px rgba(43, 32, 102, 0.06),
+    0 0 0 4px rgba(123, 79, 216, 0.13);
+}
+
+/* ----------------------------------------------------------------
+ * 5. SURFACES & ACCENTS
+ * ---------------------------------------------------------------- */
+.card {
+  background: #fff;
+  border: 1px solid var(--color-hairline);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+.hairline { border-color: var(--color-hairline); }
+
+/* Animated underline for text links. */
+.link-u {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1.5px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  padding-bottom: 3px;
+  transition: background-size 0.3s var(--ease-expo), color 0.2s var(--ease-expo);
+}
+.link-u:hover { background-size: 100% 1.5px; }
+
+/* Category pill — colored via a --c custom property per-course. */
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: color-mix(in srgb, var(--c) 13%, white);
+  color: color-mix(in srgb, var(--c) 82%, #08302a);
+  border: 1px solid color-mix(in srgb, var(--c) 30%, white);
+}
+
+/* Capsule mask — for people photography ONLY. */
+.capsule { border-radius: 999px; overflow: hidden; }
+
+/* One reusable person-photo frame: even violet border, no plate,
+   no rings or offset shapes. See <PortraitFrame> in components/ui.jsx. */
+.pframe {
+  overflow: hidden;
+  border-radius: 999px;
+  border: 3px solid var(--color-violet);
+  box-shadow: 0 14px 32px -14px rgba(123, 79, 216, 0.45);
+}
+@media (min-width: 768px) {
+  .pframe { border-width: 4px; }
+}
+.pframe > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* Film-grain finish (<= 4% opacity, static). */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.038;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ----------------------------------------------------------------
+ * 6. HERO TYPOGRAPHY FX — masked words + sheen + glow duplicate
+ * ---------------------------------------------------------------- */
+.wordmask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding: 0.06em 0.12em 0.14em;
+  margin: -0.06em -0.12em -0.14em;
+}
+.wordmask > span {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Gradient sheen text (orange / violet phrases). */
+.sheen-o,
+.sheen-v {
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: sheenX 5s linear infinite;
+}
+.sheen-o {
+  background-image: linear-gradient(110deg, #ff6b0a 25%, #ffb877 42%, #ff6b0a 58%);
+}
+.sheen-v {
+  background-image: linear-gradient(110deg, #7b4fd8 25%, #c9b3ff 42%, #7b4fd8 58%);
+}
+@keyframes sheenX {
+  0% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
+
+/* Soft color glow: a blurred duplicate behind the word, opacity pulses. */
+.glow {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+.glow > i {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  filter: blur(16px);
+  opacity: 0.45;
+  animation: glowPulse 3.6s ease-in-out infinite;
+  font-style: normal;
+}
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.28; }
+  50% { opacity: 0.7; }
+}
+
+/* Hero frame paths — drawn in with GSAP, pulse dot travels along. */
+.hero-path {
+  fill: none;
+  stroke: var(--color-frame);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ----------------------------------------------------------------
+ * 7. 3D HELPERS (CSS perspective + translateZ layers — no WebGL)
+ * ---------------------------------------------------------------- */
+.tilt-scene { perspective: 1100px; }
+.tilt-body { transform-style: preserve-3d; }
+.lz1 { transform: translateZ(26px); }
+.lz2 { transform: translateZ(46px); }
+.lz3 { transform: translateZ(66px); }
+.card-glare {
+  position: absolute;
+  inset: -45%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 55%);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+/* Pause every decorative loop while the card is off-screen. */
+.art-paused *,
+.art-paused::before,
+.art-paused::after {
+  animation-play-state: paused !important;
+}
+
+/* ----------------------------------------------------------------
+ * 8. KEYFRAME LIBRARY — one animated SVG object per course card
+ *    (transform/opacity loops only = GPU-cheap)
+ * ---------------------------------------------------------------- */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes floatYsm {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.anim-float { animation: floatY 6s ease-in-out infinite; }
+.anim-float-slow { animation: floatY 8.5s ease-in-out infinite; }
+.anim-float-sm { animation: floatYsm 5s ease-in-out infinite; }
+
+@keyframes driftA {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(60px, -50px) rotate(24deg); }
+}
+@keyframes driftB {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(-70px, 40px) rotate(-20deg); }
+}
+/* Third drift flavour — small, quick, tight radius for near shapes. */
+@keyframes driftC {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(34px, 52px) rotate(-14deg); }
+}
+.blob-anim-a { animation: driftA 26s ease-in-out infinite alternate; }
+.blob-anim-b { animation: driftB 32s ease-in-out infinite alternate; }
+.blob-anim-c { animation: driftC 22s ease-in-out infinite alternate; }
+
+/* ML laptop — neural mesh */
+@keyframes nodePulse {
+  0%, 100% { transform: scale(0.65); opacity: 0.45; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+@keyframes meshFlow {
+  to { stroke-dashoffset: -140; }
+}
+@keyframes scanY {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50% { transform: translateY(30px); opacity: 1; }
+}
+
+/* Python — typewriter lines + check pop */
+@keyframes typeIn {
+  0% { transform: scaleX(0); }
+  55%, 100% { transform: scaleX(1); }
+}
+@keyframes checkPop {
+  0%, 8% { transform: scale(0.4); opacity: 0; }
+  20%, 82% { transform: scale(1); opacity: 1; }
+  26% { transform: scale(1.14); }
+  33% { transform: scale(1); }
+  92%, 100% { transform: scale(0.4); opacity: 0; }
+}
+
+/* Leadership coins */
+@keyframes coinSpin {
+  from { transform: rotateY(0deg) translateY(0); }
+  50% { transform: rotateY(180deg) translateY(-7px); }
+  to { transform: rotateY(360deg) translateY(0); }
+}
+@keyframes shadowPulse {
+  0%, 100% { transform: scaleX(1); opacity: 0.35; }
+  50% { transform: scaleX(0.7); opacity: 0.2; }
+}
+
+/* Study tablet — orbiting skill bubbles */
+@keyframes orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes orbitR {
+  to { transform: rotate(-360deg); }
+}
+
+/* Finance — clock hands + candlesticks */
+@keyframes handSpin {
+  to { transform: rotate(360deg); }
+}
+@keyframes candleGrow {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+/* English — speech bubbles, gift, % tag */
+@keyframes bobY {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-9px) rotate(2deg); }
+}
+@keyframes wiggle {
+  0%, 82%, 100% { transform: rotate(0deg); }
+  86% { transform: rotate(-7deg); }
+  90% { transform: rotate(6deg); }
+  94% { transform: rotate(-3deg); }
+  98% { transform: rotate(2deg); }
+}
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.18); }
+  45% { transform: scale(0.94); }
+  60% { transform: scale(1.1); }
+}
+
+/* Rocket */
+@keyframes rocketBob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-12px) rotate(3deg); }
+}
+@keyframes flame {
+  from { transform: scaleY(0.7); opacity: 0.75; }
+  to { transform: scaleY(1.2); opacity: 1; }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Globe */
+@keyframes dashSpin {
+  to { stroke-dashoffset: -180; }
+}
+
+/* Paint */
+@keyframes brushSwirl {
+  0%, 100% { transform: rotate(-9deg) translateY(0); }
+  50% { transform: rotate(9deg) translateY(-6px); }
+}
+@keyframes paintDraw {
+  0% { stroke-dashoffset: 96; }
+  45%, 72% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -96; }
+}
+
+/* Microscope */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.9; }
+}
+@keyframes cellDrift {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(9px, -7px); }
+  66% { transform: translate(-7px, 8px); }
+}
+@keyframes scopeSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2.5deg); }
+}
+
+/* Calculator */
+@keyframes keyPress {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2.5px); }
+}
+@keyframes dispA {
+  0%, 44% { opacity: 1; }
+  50%, 94% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes dispB {
+  0%, 44% { opacity: 0; }
+  50%, 94% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Trophy */
+@keyframes shineX {
+  0%, 30% { transform: translateX(-46px) rotate(18deg); opacity: 0; }
+  45% { opacity: 0.9; }
+  62% { transform: translateX(120px) rotate(18deg); opacity: 0; }
+  100% { transform: translateX(120px) rotate(18deg); opacity: 0; }
+}
+@keyframes confetti {
+  0% { transform: translateY(-8px) rotate(0deg); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(44px) rotate(200deg); opacity: 0; }
+}
+
+/* Shared micro-widgets */
+@keyframes ringPulse {
+  0% { transform: scale(1); opacity: 0.55; }
+  80%, 100% { transform: scale(1.85); opacity: 0; }
+}
+@keyframes pinBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+@keyframes rippleMap {
+  0% { transform: scale(0.4); opacity: 0.6; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+@keyframes logoPulse {
+  0%, 100% { transform: scale(0.92); opacity: 0.8; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+
+/* ----------------------------------------------------------------
+ * 8b. COURSE-ART HELPER CLASSES — bind keyframes to SVG nodes.
+ *     transform-box/origin keep rotations inside each shape.
+ * ---------------------------------------------------------------- */
+.a-node { animation: nodePulse 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.a-mesh { stroke-dasharray: 4 6; animation: meshFlow 7s linear infinite; }
+.a-scan { animation: scanY 3.6s ease-in-out infinite; }
+.a-type { transform-box: fill-box; transform-origin: left center; animation: typeIn 3.2s var(--ease-expo) infinite; }
+.a-check { transform-box: fill-box; transform-origin: center; animation: checkPop 3.8s var(--ease-pop) infinite; }
+.a-coin { transform-box: fill-box; transform-origin: center; animation: coinSpin 3.2s linear infinite; }
+.a-shadow { transform-box: fill-box; transform-origin: center; animation: shadowPulse 3.2s ease-in-out infinite; }
+.a-orbit { transform-box: view-box; transform-origin: center; animation: orbit 13s linear infinite; }
+.a-orbit-r { transform-box: view-box; transform-origin: center; animation: orbitR 13s linear infinite; }
+.a-hand { transform-box: fill-box; transform-origin: 50% 90%; animation: handSpin 12s linear infinite; }
+.a-hand-fast { transform-box: fill-box; transform-origin: 50% 90%; animation: handSpin 2.4s linear infinite; }
+.a-candle { transform-box: fill-box; transform-origin: 50% 100%; animation: candleGrow 3.4s ease-in-out infinite; }
+.a-bob { animation: bobY 4.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.a-wiggle { animation: wiggle 5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+.a-beat { animation: heartBeat 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.a-rocket { animation: rocketBob 4.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.a-flame { animation: flame 0.45s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 0%; }
+.a-star { animation: twinkle 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.a-dspin { stroke-dasharray: 6 8; animation: dashSpin 8s linear infinite; }
+.a-gslow { animation: orbit 18s linear infinite; transform-origin: center; transform-box: view-box; }
+.a-sat { animation: orbit 9s linear infinite; transform-origin: center; transform-box: view-box; }
+.a-brush { animation: brushSwirl 4.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 80% 15%; }
+.a-draw { stroke-dasharray: 96; animation: paintDraw 5.4s ease-in-out infinite; }
+.a-glow { animation: pulseGlow 2.8s ease-in-out infinite; }
+.a-cell { animation: cellDrift 6.5s ease-in-out infinite; }
+.a-sway { animation: scopeSway 5.5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+.a-key { animation: keyPress 2.8s var(--ease-expo) infinite; transform-box: fill-box; transform-origin: center; }
+.a-dispA { animation: dispA 6.4s steps(1) infinite; }
+.a-dispB { animation: dispB 6.4s steps(1) infinite; }
+.a-shine { animation: shineX 4.2s var(--ease-expo) infinite; }
+.a-conf { animation: confetti 3.8s ease-in infinite; transform-box: fill-box; transform-origin: center; }
+
+/* ----------------------------------------------------------------
+ * 9. ACCESSIBILITY — reduced motion becomes a calm static site
+ * ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
